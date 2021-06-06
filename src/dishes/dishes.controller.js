@@ -72,6 +72,44 @@ function create(request, response) {
   response.status(201).json({ data: newDish });
 }
 
+function dishIdExists(request, response, next) {
+  const { dishId } = request.params;
+  const foundDishId = dishes.find((dish) => dish.id === Number(dishId));
+  if (foundDishId) {
+    // response.locals.dishId = foundDishId;
+    return next();
+  }
+  next({
+    status: 404,
+    message: "No matching dish is found",
+  });
+}
+
+function read(request, response) {
+  const filteredId = dishes.find(
+    (dish) => dish.id === Number(request.params.dishId)
+  );
+  response.json({ data: filteredId });
+}
+
+// function idMatches(request, response, next) {
+//   const { dish } = response.locals;
+//   const { data: { id } = {} } = request.body;
+//   const { dishId } = request.params;
+//   if (!id || dish.id === id) {
+//     return next();
+//   }
+//     return next({
+//     status: 400,
+//     message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`,
+//   });
+// }
+
+// function update(request, response) {
+//   const dishId = response.locals.dishId;
+//   const original
+// }
+
 module.exports = {
   list,
   create: [
@@ -81,4 +119,6 @@ module.exports = {
     bodyHasImgUrl,
     create,
   ],
+  read: [dishIdExists, read],
+  // update: [update],
 };
