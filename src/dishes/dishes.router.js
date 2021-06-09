@@ -6,7 +6,7 @@ const methodNotAllowed = require("../errors/methodNotAllowed");
 router
   .route("/:dishId")
   .get(controller.read) //read
-  // .put(controller.update) //update
+  .put(controller.update) //update
   .all(methodNotAllowed); //validation
 
 router

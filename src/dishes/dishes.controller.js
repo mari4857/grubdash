@@ -74,9 +74,9 @@ function create(request, response) {
 
 function dishIdExists(request, response, next) {
   const { dishId } = request.params;
-  const foundDishId = dishes.find((dish) => dish.id === Number(dishId));
+  const foundDishId = dishes.find((dish) => dish.id === dishId);
   if (foundDishId) {
-    // response.locals.dishId = foundDishId;
+    response.locals.dishId = foundDishId;
     return next();
   }
   next({
@@ -86,29 +86,47 @@ function dishIdExists(request, response, next) {
 }
 
 function read(request, response) {
-  const filteredId = dishes.find(
-    (dish) => dish.id === Number(request.params.dishId)
-  );
-  response.json({ data: filteredId });
+  response.json({ data: response.locals.dishId });
 }
 
-// function idMatches(request, response, next) {
-//   const { dish } = response.locals;
-//   const { data: { id } = {} } = request.body;
-//   const { dishId } = request.params;
-//   if (!id || dish.id === id) {
-//     return next();
-//   }
-//     return next({
-//     status: 400,
-//     message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`,
-//   });
-// }
-
-// function update(request, response) {
-//   const dishId = response.locals.dishId;
-//   const original
-// }
+function update(request, response, next) {
+  const { id, price, name, description, image_url } = request.body.data;
+  if (response.locals.dishId.id !== id && id) {
+    return next({
+      status: 400,
+      message: `Dish id does not match route id. Dish: ${id}, Route: ${response.locals.dishId.id}`,
+    });
+  }
+  if (!name) {
+    return next({
+      status: 400,
+      message: `name does not exist`,
+    });
+  }
+  if (!description) {
+    return next({
+      status: 400,
+      message: `description does not exist`,
+    });
+  }
+  if (!image_url) {
+    return next({
+      status: 400,
+      message: `image_url does not exist`,
+    });
+  }
+  if (!price || typeof price !== "number" || price < 0) {
+    return next({
+      status: 400,
+      message: `price does not exist`,
+    });
+  }
+  const dish = response.locals.dishId;
+  dish.name = name;
+  dish.price = price;
+  dish.description = description;
+  response.json({ data: dish });
+}
 
 module.exports = {
   list,
@@ -120,5 +138,5 @@ module.exports = {
     create,
   ],
   read: [dishIdExists, read],
-  // update: [update],
+  update: [dishIdExists, update],
 };
